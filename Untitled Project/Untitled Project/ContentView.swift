@@ -1,10 +1,14 @@
-import SwiftUI
 import Playgrounds
+import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        Text("Hello, world!")
+        Text(helloWorld())
             .padding()
+    }
+
+    func helloWorld() -> String {
+        return "Hello, world!"
     }
 }
 
