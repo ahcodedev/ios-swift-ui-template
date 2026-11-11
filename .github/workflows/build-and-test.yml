@@ -1,0 +1,58 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
+  DESTINATION: platform=iOS Simulator,name=iPhone 17,OS=27.2
+  RESULTS: build/TestResults.xcresult
+
+jobs:
+  build-and-test:
+    runs-on: xcode-27
+    timeout-minutes: 30
+    permissions:
+      contents: read # checkout; only needed for private repos
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Read project name
+        run: |
+          name="$(cat .project_name)"
+          echo "PROJECT=$name/$name.xcodeproj" >> "$GITHUB_ENV"
+          echo "SCHEME=$name" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: |
+          xcodebuild build \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -destination "$DESTINATION" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Test
+        run: |
+          xcodebuild test \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -destination "$DESTINATION" \
+            -resultBundlePath "$RESULTS" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Check coverage
+        run: |
+          xcrun xccov view --report --only-targets "$RESULTS"
+          xcrun xccov view --report --json "$RESULTS" |
+            jq -er --arg target "${SCHEME}.app" --argjson min "$(cat .minimum_coverage)" \
+              '.targets[] | select(.name == $target) | .lineCoverage * 10000 | round / 100 | if . >= $min then "Coverage \(.)% meets the \($min)% minimum" else error("Coverage \(.)% is below the \($min)% minimum") end'

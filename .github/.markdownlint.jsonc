@@ -1,0 +1,5 @@
+{
+  "extends": "../.markdownlint.jsonc",
+  // The PR template is inserted below the PR title, so it starts at h2.
+  "MD041": false
+}

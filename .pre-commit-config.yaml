@@ -1,0 +1,20 @@
+repos:
+  - repo: local
+    hooks:
+      - id: swift-format
+        name: swift format
+        entry: swift format --in-place
+        language: system
+        files: \.swift$
+
+      - id: swift-lint
+        name: swift format lint
+        entry: swift format lint --strict
+        language: system
+        files: \.swift$
+
+      - id: gitleaks
+        name: gitleaks
+        entry: gitleaks git --pre-commit --staged --redact
+        language: system
+        pass_filenames: false
