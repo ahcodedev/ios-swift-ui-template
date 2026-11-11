@@ -1,5 +1,7 @@
-project := "Untitled Project"
+project := trim(read(".project_name"))
 destination := "platform=iOS Simulator,name=iPhone 17"
+results := "build/TestResults.xcresult"
+min_coverage := trim(read(".minimum_coverage"))
 
 [private]
 list:
@@ -12,6 +14,14 @@ build:
 # Run the unit and UI tests on the iOS simulator
 test:
     xcodebuild test -project "{{project}}/{{project}}.xcodeproj" -scheme "{{project}}" -destination "{{destination}}"
+
+# Run the tests and fail if app line coverage is below min percent
+coverage min=min_coverage:
+    rm -rf "{{results}}"
+    xcodebuild test -project "{{project}}/{{project}}.xcodeproj" -scheme "{{project}}" -destination "{{destination}}" -resultBundlePath "{{results}}"
+    xcrun xccov view --report --only-targets "{{results}}"
+    xcrun xccov view --report --json "{{results}}" | jq -er --arg target "{{project}}.app" --argjson min "{{min}}" \
+        '.targets[] | select(.name == $target) | .lineCoverage * 10000 | round / 100 | if . >= $min then "Coverage \(.)% meets the \($min)% minimum" else error("Coverage \(.)% is below the \($min)% minimum") end'
 
 # Scan the repo and its git history for secrets
 gitleaks:

@@ -1,3 +1,4 @@
+brew "copier"
 brew "gitleaks"
 brew "just"
 brew "prek"

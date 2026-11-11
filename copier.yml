@@ -1,0 +1,24 @@
+# Copier manages only the tooling; the Xcode project, README and LICENSE are per-project.
+_min_copier_version: "9"
+
+_exclude:
+  # Copier defaults (replaced by setting this list)
+  - copier.yml
+  - "~*"
+  - "*.py[co]"
+  - __pycache__
+  - .git
+  - .DS_Store
+  - .svn
+  # Per-project content
+  - Untitled Project
+  - README.md
+  - LICENSE
+  - CLAUDE.md
+  - .claude
+  - build
+
+# Project-specific values: seeded on first copy, never overwritten by updates.
+_skip_if_exists:
+  - .project_name
+  - .minimum_coverage

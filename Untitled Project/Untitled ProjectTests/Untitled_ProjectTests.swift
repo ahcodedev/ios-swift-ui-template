@@ -15,7 +15,7 @@ struct Untitled_ProjectTests {
     @Test func example() async throws {
         let view = ContentView()
         let msg = view.helloWorld()
-        #expect(msg == "Hello,world!")
+        #expect(msg == "Hello, world!")
     }
 
 }
